@@ -17,9 +17,9 @@ def run(training_data):
     if training_data:
         logger.info('Starting training session #{0}'.format(training_data.uid))
         logger.info(training_data)
-        f = ex.submit(tc.start_learning, training_data)
-        f.arg = training_data.uid
-        f.add_done_callback(done_callback)
+        process = ex.submit(tc.start_learning, training_data)
+        process.arg = training_data.uid
+        process.add_done_callback(done_callback)
         return False
     else:
         logger.info('No more training data available. Waiting for running sessions to complete.')
@@ -29,18 +29,18 @@ def run(training_data):
 def done_callback(process):
     global interrupted, completed
     if process.cancelled():
-        logger.warning('Future {0} was cancelled'.format(process.arg))
+        logger.warning('Process {0} was cancelled'.format(process.arg))
     elif process.done():
         error = process.exception()
         if error:
-            logger.error('Future {0} - {1} '.format(process.arg, error))
+            logger.error('Process {0} - {1} '.format(process.arg, error))
             logger.warning('Training was interrupted')
         else:
             ht.result_handler(process.result())
-            logger.debug('Future {0} done'.format(process.arg))
+            logger.debug('Process {0} done'.format(process.arg))
             if interrupted is False:
                 if completed is False:
-                    completed = run(ht.get_next())
+                    completed = run(ht.get_training_data())
                 else:
                     logger.info('All training sessions completed')
             else:
@@ -119,4 +119,4 @@ if __name__ == '__main__':
     interrupted = False
     for i in range(workers):
         if completed is False:
-            completed = run(ht.get_next())
+            completed = run(ht.get_training_data())

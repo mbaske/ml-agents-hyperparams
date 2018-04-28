@@ -11,9 +11,9 @@ class TrainingData():
 
     def __init__(self, hyperparams, descr, stop_conditions=None, verbose_result=False):
         """
-        :param hyperparams: dict - Will override values loaded from trainer_config.yaml
+        :param hyperparams: dict - Will complement/override values loaded from trainer_config.yaml
         :param descr: string - Will be added to the directory names of models and summaries (run_id + descr)
-        :param stop_conditions: array
+        :param stop_conditions: array of StopCondition objects, training stops if ANY of them evaluate True
         :param verbose_result: bool - True: store all stat summaries / False: store last summary only
         """
         self._hyperparams = hyperparams

@@ -331,7 +331,7 @@ class TrainerController(object):
                 if summary:
                     stop_condition_met = self.training_data.add_summary(summary)
                     if stop_condition_met:
-                        self.logger.info('Training session #{0} was stopped because {1}'.format(
+                        self.logger.info('Training session #{0} is stopping because {1}'.format(
                             self.training_data.uid, stop_condition_met))
                         break
                 if interrupted:

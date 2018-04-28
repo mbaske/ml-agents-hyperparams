@@ -29,18 +29,9 @@ class HyperTuner():
                 descr = '_beta_{0}_gamma_{1}'.format('%.0E' % Decimal(b), g)
                 self.stack.append(TrainingData(hyper, descr, stop))
 
-    def get_next(self):
-        if len(self.stack) is self.counter:
-            return None
-        else:
-            data = self.stack[self.counter]
-            data.uid = self.counter
-            self.counter += 1
-            return data
-
     def result_handler(self, training_data):
         """
-        Could be used for creating new training data based on results from previous sessions
+        Could be used for generating new training data based on results from previous sessions
         e.g. bayesian optimization
         """
         self.logger.info("Training session #{0} finished (exit {1})".format(training_data.uid, training_data.exit_status))
@@ -50,3 +41,16 @@ class HyperTuner():
             for key, value in training_data.result[r - 1].items():
                 s += '\n\t{0}: \t{1}'.format(key, value)
             self.logger.info(s)
+
+    def get_training_data(self):
+        """
+        Called by tune.py - Every new training session fetches 1 TrainingData object,
+        adds stat results to it during training and returns it to result_handler after completion
+        """
+        if len(self.stack) is self.counter:
+            return None
+        else:
+            data = self.stack[self.counter]
+            data.uid = self.counter
+            self.counter += 1
+            return data
