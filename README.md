@@ -5,8 +5,8 @@
 Speed up and automate optimization of hyperparameters for your [Unity Machine Learning Agents](https://github.com/Unity-Technologies/ml-agents) projects.
 
 ### How to use
-* Implement your optimization algorithm in [/python/unitytrainers/hypertuner.py](https://github.com/mbaske/ml-agents/tree/master/python/unitytrainers/hypertuner.py)
-* Run [/python/tune.py](https://github.com/mbaske/ml-agents/blob/master/python/tune.py)
+* Implement your optimization algorithm in [/python/unitytrainers/hypertuner.py](https://github.com/mbaske/ml-agents-hyperparams/tree/master/python/unitytrainers/hypertuner.py)
+* Run [/python/tune.py](https://github.com/mbaske/ml-agents-hyperparams/blob/master/python/tune.py)
 
 Options are identical to running learn.py with the exception of --worker-id which is not supported. Instead, you might pass --workers=\<n> for setting the number of concurrent training sessions. Each session runs in its own process with the default number of processes matching the amount of CPU cores. 
 
