@@ -1,88 +1,42 @@
-<img src="docs/images/unity-wide.png" align="middle" width="3000"/>
 
-# Unity ML-Agents (Beta)
 
-**Unity Machine Learning Agents** (ML-Agents) is an open-source Unity plugin 
-that enables games and simulations to serve as environments for training
-intelligent agents. Agents can be trained using reinforcement learning,
-imitation learning, neuroevolution, or other machine learning methods through
-a simple-to-use Python API. We also provide implementations (based on
-TensorFlow) of state-of-the-art algorithms to enable game developers
-and hobbyists to easily train intelligent agents for 2D, 3D and VR/AR games.
-These trained agents can be used for multiple purposes, including
-controlling NPC behavior (in a variety of settings such as multi-agent and
-adversarial), automated testing of game builds and evaluating different game
-design decisions pre-release. ML-Agents is mutually beneficial for both game
-developers and AI researchers as it provides a central platform where advances
-in AI can be evaluated on Unity’s rich environments and then made accessible
-to the wider research and game developer communities. 
+## Automated Hyperparameter Tuning for Unity ML-Agents
 
-## Features
-* Unity environment control from Python
-* 10+ sample Unity environments
-* Support for multiple environment configurations and training scenarios
-* Train memory-enhanced Agents using deep reinforcement learning
-* Easily definable Curriculum Learning scenarios
-* Broadcasting of Agent behavior for supervised learning
-* Built-in support for Imitation Learning
-* Flexible Agent control with On Demand Decision Making
-* Visualizing network outputs within the environment
-* Simplified set-up with Docker
+Speed up and automate optimization of hyperparameters for your [Unity Machine Learning Agents](https://github.com/Unity-Technologies/ml-agents) projects.
 
-## Documentation and References
+### How to use
+* Implement your optimization algorithm in [/python/unitytrainers/hypertuner.py](https://github.com/mbaske/ml-agents/tree/master/python/unitytrainers/hypertuner.py)
+* Run [/python/tune.py](https://github.com/mbaske/ml-agents/blob/master/python/tune.py)
 
-**For more information, in addition to installation and usage
-instructions, see our [documentation home](docs/Readme.md).** If you have
-used a version of ML-Agents prior to v0.3, we strongly recommend 
-our [guide on migrating to v0.3](docs/Migrating-v0.3.md).
+Options are identical to running learn.py with the exception of --worker-id which is not supported. Instead, you might pass --workers=\<n> for setting the number of concurrent training sessions. Each session runs in its own process with the default number of processes matching the amount of CPU cores. 
 
-We have also published a series of blog posts that are relevant for ML-Agents:
-- Overviewing reinforcement learning concepts
-([multi-armed bandit](https://blogs.unity3d.com/2017/06/26/unity-ai-themed-blog-entries/)
-and [Q-learning](https://blogs.unity3d.com/2017/08/22/unity-ai-reinforcement-learning-with-q-learning/))
-- [Using Machine Learning Agents in a real game: a beginner’s guide](https://blogs.unity3d.com/2017/12/11/using-machine-learning-agents-in-a-real-game-a-beginners-guide/)
-- [Post](https://blogs.unity3d.com/2018/02/28/introducing-the-winners-of-the-first-ml-agents-challenge/) announcing the winners of our
-[first ML-Agents Challenge](https://connect.unity.com/challenges/ml-agents-1)
-- [Post](https://blogs.unity3d.com/2018/01/23/designing-safer-cities-through-simulations/)
-overviewing how Unity can be leveraged as a simulator to design safer cities.
+Hyperparameters still get loaded from trainer_config.yaml. However, they will be complemented or overridden by the ones defined in your code.
 
-In addition to our own documentation, here are some additional, relevant articles:
-- [Unity AI - Unity 3D Artificial Intelligence](https://www.youtube.com/watch?v=bqsfkGbBU6k)
-- [A Game Developer Learns Machine Learning](https://mikecann.co.uk/machine-learning/a-game-developer-learns-machine-learning-intent/)
-- [Explore Unity Technologies ML-Agents Exclusively on Intel Architecture](https://software.intel.com/en-us/articles/explore-unity-technologies-ml-agents-exclusively-on-intel-architecture)
+Tested with ml-agents v0.3 on macOS (Python 3.6). Consider this project an experiment, I might not maintain code compatibility with future releases of ml-agents.
 
-## Community and Feedback
+### Example
+This is a simple grid search demo. We use the tennis environment from ml-agents examples. Training data is being created beforehand and then served incrementally to the training sessions.
 
-ML-Agents is an open-source project and we encourage and welcome contributions.
-If you wish to contribute, be sure to review our 
-[contribution guidelines](CONTRIBUTING.md) and 
-[code of conduct](CODE_OF_CONDUCT.md).
+	def _setup(self):
+        stop = [StopCondition('episode_length', '> 40')]
+        beta = [1e-4, 1e-3, 1e-2]
+        gamma = [0.8, 0.9, 0.995]
+        for b in beta:
+            for g in gamma:
+                hyper = {'beta': b, 'gamma': g}
+                descr = '_beta_{0}_gamma_{1}'.format('%.0E' % Decimal(b), g)
+                self.stack.append(TrainingData(hyper, descr, stop))
+                
+Start your training sessions and compare their performance in TensorBoard.
 
-You can connect with us and the broader community
-through Unity Connect and GitHub:
-* Join our
-[Unity Machine Learning Channel](https://connect.unity.com/messages/c/035fba4f88400000)
-to connect with others using ML-Agents and Unity developers enthusiastic
-about machine learning. We use that channel to surface updates
-regarding ML-Agents (and, more broadly, machine learning in games).
-* If you run into any problems using ML-Agents, 
-[submit an issue](https://github.com/Unity-Technologies/ml-agents/issues) and
-make sure to include as much detail as possible.
+	python3 tune.py tennis --run-id=tennis --save-freq=25000 --train
+	tensorboard --logdir=summaries
 
-For any other questions or feedback, connect directly with the ML-Agents
-team at ml-agents@unity3d.com.
+<img src="images/tensorboard.png" align="middle" width="1440"/>
 
-## Translations
+Of course, things get more interesting once your code creates training data based on results from previous sessions. Look into the result_handler method for that.
 
-To make Unity ML-Agents accessible to the global research and
-Unity developer communities, we're attempting to create and maintain
-translations of our documentation. We've started with translating a subset
-of the documentation to one language (Chinese), but we hope to continue
-translating more pages and to other languages. Consequently,
-we welcome any enhancements and improvements from the community.
+Please note that I removed the logging of cumulative rewards during training. With multiple processes running at once, that was somewhat confusing. Use TensorBoard to track the training progess instead.
 
-- [Chinese](docs/localized/zh-CN/)
-
-## License
-
+### License
 [Apache License 2.0](LICENSE)
