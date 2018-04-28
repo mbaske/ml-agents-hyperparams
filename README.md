@@ -1,6 +1,6 @@
 
 
-## Automated Hyperparameter Tuning for Unity ML-Agents
+## Automated Hyperparameter Tuning for Unity Machine Learning Agents
 
 Speed up and automate optimization of hyperparameters for your [Unity Machine Learning Agents](https://github.com/Unity-Technologies/ml-agents) projects.
 
@@ -34,7 +34,7 @@ Start your training sessions and compare their performance in TensorBoard.
 
 <img src="images/tensorboard.png" align="middle" width="1440"/>
 
-Of course, things get more interesting once your code creates training data based on results from previous sessions. Look into the result_handler method for that.
+Of course, things get more interesting once your code generates training data based on results from previous sessions. Look into the result_handler method for that.
 
 Please note that I removed the logging of cumulative rewards during training. With multiple processes running at once, that was somewhat confusing. Use TensorBoard to track the training progess instead.
 
