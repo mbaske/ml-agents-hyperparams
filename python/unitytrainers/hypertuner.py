@@ -18,7 +18,7 @@ class HyperTuner():
 
     def _setup(self):
         """
-        Simple grid search demo. Create some training data and serve via get_next()
+        Simple grid search demo.
         """
         stop = [StopCondition('episode_length', '> 40')]
         beta = [1e-4, 1e-3, 1e-2]
