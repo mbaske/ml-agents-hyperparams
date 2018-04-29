@@ -13,7 +13,7 @@ from unitytrainers.trainer_controller_mod import TrainerController
 from unitytrainers.hypertuner import HyperTuner
 
 
-def run(training_data):
+def start_process(training_data):
     if training_data:
         logger.info('Starting training session #{0}'.format(training_data.uid))
         logger.info(training_data)
@@ -22,27 +22,26 @@ def run(training_data):
         process.add_done_callback(done_callback)
         return False
     else:
-        logger.info('No more training data available. Waiting for running sessions to complete.')
+        logger.info('No more training data available, waiting for running sessions to finish')
         return True
 
 
 def done_callback(process):
-    global interrupted, completed
+    global interrupted, out_of_data
     if process.cancelled():
         logger.warning('Process {0} was cancelled'.format(process.arg))
     elif process.done():
         error = process.exception()
         if error:
             logger.error('Process {0} - {1} '.format(process.arg, error))
-            logger.warning('Training was interrupted')
         else:
             ht.result_handler(process.result())
             logger.debug('Process {0} done'.format(process.arg))
             if interrupted is False:
-                if completed is False:
-                    completed = run(ht.get_training_data())
+                if out_of_data is False:
+                    out_of_data = start_process(ht.get_training_data())
                 else:
-                    logger.info('All training sessions completed')
+                    logger.info('All training sessions completed!')
             else:
                 logger.warning('Training was interrupted')
 
@@ -115,8 +114,8 @@ if __name__ == '__main__':
     logger.info('Starting - {0} workers'.format(workers))
     ht = HyperTuner()
     ex = futures.ProcessPoolExecutor(max_workers=workers)
-    completed = False
+    out_of_data = False
     interrupted = False
     for i in range(workers):
-        if completed is False:
-            completed = run(ht.get_training_data())
+        if out_of_data is False:
+            out_of_data = start_process(ht.get_training_data())
