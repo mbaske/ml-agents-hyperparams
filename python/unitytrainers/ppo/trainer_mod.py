@@ -97,7 +97,7 @@ class PPOTrainer(Trainer):
     def get_summary(self):
         """
         Returns the last stats summary of the trainer.
-        TODO implement event dispatcher, notify TrainerController when a new stat summary was created
+        TODO implement event dispatcher, notify TrainerController when a new stats summary was created
         For now, we just clear the summary field, so TrainerController doesn't repeat setting the same
         data at every step
         """

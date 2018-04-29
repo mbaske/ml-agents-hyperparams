@@ -31,7 +31,7 @@ class HyperTuner():
 
     def result_handler(self, training_data):
         """
-        Could be used for generating new training data based on results from previous sessions
+        Could be used for generating new training data based on results from previous sessions,
         e.g. bayesian optimization
         """
         self.logger.info("Training session #{0} finished (exit {1})".format(training_data.uid, training_data.exit_status))
@@ -45,7 +45,7 @@ class HyperTuner():
     def get_training_data(self):
         """
         Called by tune.py - Every new training session fetches 1 TrainingData object,
-        adds stat results to it during training and returns it to result_handler after completion
+        adds training stats to its result array during training and returns it to result_handler after completion.
         """
         if len(self.stack) is self.counter:
             return None

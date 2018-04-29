@@ -11,10 +11,10 @@ class TrainingData():
 
     def __init__(self, hyperparams, descr, stop_conditions=None, verbose_result=False):
         """
-        :param hyperparams: dict - Will complement/override values loaded from trainer_config.yaml
+        :param hyperparams: dict - Will complement/override values loaded from trainer_config.yaml (Param names must be identical)
         :param descr: string - Will be added to the directory names of models and summaries (run_id + descr)
         :param stop_conditions: array of StopCondition objects, training stops if ANY of them evaluate True
-        :param verbose_result: bool - True: store all stat summaries / False: store last summary only
+        :param verbose_result: bool - True: store all training stats summaries / False: store last summary only
         """
         self._hyperparams = hyperparams
         self._descr = descr
@@ -26,26 +26,44 @@ class TrainingData():
 
     @property
     def hyperparams(self):
+        """
+        :return: dict - Hyperparameters
+        """
         return self._hyperparams
 
     @property
     def stop_conditions(self):
+        """
+        :return: array of StopCondition objects
+        """
         return self._stop_conditions
 
     @property
     def result(self):
+        """
+        :return: array of dicts containing training stats
+        """
         return self._result
 
     @property
     def exit_status(self):
+        """
+        :return: int - Exit status (default, interrupted or stop condition index)
+        """
         return self._exit_status
 
     @property
     def descr(self):
+        """
+        :return: string - Suffix for model and summaries directory names (run_id + descr)
+        """
         return self._descr
 
     @property
     def uid(self):
+        """
+        :return: int - Counter value set by HyperTuner
+        """
         return self._uid
 
     @uid.setter
@@ -60,9 +78,9 @@ class TrainingData():
         return self.stop_condition_met()
 
     def stop_condition_met(self):
-        if self._stop_conditions:
+        if self.stop_conditions:
             summary = self.result[len(self.result) - 1]
-            for i, cond in enumerate(self._stop_conditions):
+            for i, cond in enumerate(self.stop_conditions):
                 if cond.evaluate(summary):
                     self._exit_status = i
                     return cond
