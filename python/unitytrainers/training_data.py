@@ -11,11 +11,19 @@ class TrainingData():
 
     def __init__(self, hyperparams, descr, stop_conditions=None, verbose_result=False):
         """
-        :param hyperparams: dict - Will complement/override values loaded from trainer_config.yaml (Param names must be identical)
-        :param descr: string - Will be added to the directory names of models and summaries (run_id + descr)
-        :param stop_conditions: array of StopCondition objects, training stops if ANY of them evaluate True
-        :param verbose_result: bool - True: store all training stats summaries / False: store last summary only
+        Data for running a training session
+
+        @type  hyperparams: dict
+        @param hyperparams: Hyperparameters to complement/override the values loaded from trainer_config.yaml
+                            Parameter names must be identical
+        @type  descr: string
+        @param descr: Will be added to the directory names of models and summaries (run_id + descr)
+        @type  stop_conditions: array
+        @param stop_conditions: StopCondition objects, training stops if ANY of them evaluate True
+        @type  verbose_result: bool
+        @param verbose_result: True: store all training stats summaries / False: store last summary only
         """
+
         self._hyperparams = hyperparams
         self._descr = descr
         self._stop_conditions = stop_conditions
@@ -27,42 +35,60 @@ class TrainingData():
     @property
     def hyperparams(self):
         """
-        :return: dict - Hyperparameters
+        Returns the hyperparameters for the training
+
+        @rtype:   dict
+        @return:  Hyperparameters
         """
         return self._hyperparams
 
     @property
     def stop_conditions(self):
         """
-        :return: array of StopCondition objects
+        Returns the stop condition(s) for the training
+
+        @rtype:   array
+        @return:  StopCondition objects
         """
         return self._stop_conditions
 
     @property
     def result(self):
         """
-        :return: array of dicts containing training stats
+        Returns the training's stats summaries
+
+        @rtype:   array
+        @return:  Dict objects containing training stats
         """
         return self._result
 
     @property
     def exit_status(self):
         """
-        :return: int - Exit status (default, interrupted or stop condition index)
+        Returns the training's exit status
+
+        @rtype:   int
+        @return:  Exit status (default, interrupted or stop condition index)
         """
         return self._exit_status
 
     @property
     def descr(self):
         """
-        :return: string - Suffix for model and summaries directory names (run_id + descr)
+        Returns the training's short description
+
+        @rtype:   string
+        @return:  Suffix for model and summaries directory names
         """
         return self._descr
 
     @property
     def uid(self):
         """
-        :return: int - Counter value set by HyperTuner
+        Returns the training ID
+
+        @rtype:   int
+        @return:  Counter value set by HyperTuner
         """
         return self._uid
 

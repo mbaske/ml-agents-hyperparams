@@ -22,7 +22,7 @@ logger = logging.getLogger("unityagents")
 class BehavioralCloningTrainer(Trainer):
     """The ImitationTrainer is an implementation of the imitation learning."""
 
-    def __init__(self, sess, env, brain_name, trainer_parameters, training, seed):
+    def __init__(self, sess, env, brain_name, trainer_parameters, training, seed, summary_event):
         """
         Responsible for collecting experiences and training PPO model.
         :param sess: Tensorflow session.
@@ -78,7 +78,7 @@ class BehavioralCloningTrainer(Trainer):
                 normalize=False,
                 use_recurrent=trainer_parameters['use_recurrent'],
                 brain=self.brain)
-        self.summary = None
+        self.summary_event = summary_event
         # Steps per second
         self.sps_step = 0
         self.sps_time = time.time()
@@ -87,18 +87,6 @@ class BehavioralCloningTrainer(Trainer):
 
         return '''Hyperparameters for the Imitation Trainer of brain {0}: \n{1}'''.format(
             self.brain_name, '\n'.join(['\t{0}:\t{1}'.format(x, self.trainer_parameters[x]) for x in self.param_keys]))
-
-    @property
-    def get_summary(self):
-        """
-        Returns the last stats summary of the trainer.
-        TODO implement event dispatcher, notify TrainerController when a new stats summary was created
-        For now, we just clear the summary field, so TrainerController doesn't repeat setting the same
-        data at every step
-        """
-        summary = self.summary.copy() if self.summary else None
-        self.summary = None
-        return summary
 
     @property
     def parameters(self):
@@ -345,25 +333,26 @@ class BehavioralCloningTrainer(Trainer):
                 self.is_training and self.get_step <= self.get_max_steps):
             steps = self.get_step
 
-            self.summary = {}
-            self.summary['step'] = self.get_step
-            self.summary['steps_per_second'] = (self.get_step - self.sps_step) / (time.time() - self.sps_time)
+            summ = {}
+            summ['step'] = self.get_step
+            summ['steps_per_second'] = (self.get_step - self.sps_step) / (time.time() - self.sps_time)
             self.sps_time = time.time()
             self.sps_step = self.get_step
             has_reward = len(self.stats['cumulative_reward']) > 0
             if has_reward:
-                self.summary['reward_sigma'] = np.std(self.stats['cumulative_reward'])
+                summ['reward_sigma'] = np.std(self.stats['cumulative_reward'])
 
             summary = tf.Summary()
             for key in self.stats:
                 if len(self.stats[key]) > 0:
                     stat_mean = float(np.mean(self.stats[key]))
                     summary.value.add(tag='Info/{}'.format(key), simple_value=stat_mean)
-                    self.summary[key] = stat_mean
+                    summ[key] = stat_mean
                     self.stats[key] = []
             summary.value.add(tag='Info/Lesson', simple_value=lesson_number)
-            summary.value.add(tag='Info/steps_per_second', simple_value=self.summary['steps_per_second'])
+            summary.value.add(tag='Info/steps_per_second', simple_value=summ['steps_per_second'])
             if has_reward:
-                summary.value.add(tag='Info/reward_sigma', simple_value=self.summary['reward_sigma'])
+                summary.value.add(tag='Info/reward_sigma', simple_value=summ['reward_sigma'])
             self.summary_writer.add_summary(summary, steps)
             self.summary_writer.flush()
+            self.summary_event.dispatch(self, summ)

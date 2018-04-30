@@ -25,7 +25,7 @@ This is a simple grid search demo. We use the tennis environment from ml-agents 
             for g in gamma:
                 hyper = {'beta': b, 'gamma': g}
                 descr = '_beta_{0}_gamma_{1}'.format('%.0E' % Decimal(b), g)
-                self.stack.append(TrainingData(hyper, descr, stop))
+                self.training_data.append(TrainingData(hyper, descr, stop))
                 
 Start your training sessions and compare their performance in TensorBoard.
 

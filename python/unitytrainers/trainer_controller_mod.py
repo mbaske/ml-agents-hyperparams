@@ -19,6 +19,27 @@ from unitytrainers.bc.trainer_mod import BehavioralCloningTrainer
 from unityagents import UnityEnvironment, UnityEnvironmentException
 
 
+class SummaryEvent():
+
+    def __init__(self, default_handler):
+        self.handlers = [default_handler]
+
+    def __exit__(self):
+        self.handlers = []
+
+    def add(self, handler):
+        self.handlers.append(handler)
+        return self
+
+    def remove(self, handler):
+        self.handlers.remove(handler)
+        return self
+
+    def dispatch(self, trainer, summary):
+        for handler in self.handlers:
+            handler(trainer, summary)
+
+
 class TrainerController(object):
     def __enter__(self):
         self.handler_SIGTERM = signal.getsignal(signal.SIGTERM)
@@ -105,6 +126,8 @@ class TrainerController(object):
         tf.set_random_seed(self.seed)
         self.env_name = os.path.basename(os.path.normpath(env_path))  # Extract out name of environment
         self.env_path = env_path
+        self.stop_condition_met = None
+        self.summary_event = SummaryEvent(self._on_summary_created)
         # replaces former KeyboardInterrupt exception handler
         signal.signal(signal.SIGTERM, self._on_interrupt)
         signal.signal(signal.SIGINT, self._on_interrupt)
@@ -116,6 +139,9 @@ class TrainerController(object):
         interrupted = True
         # notify main process
         os.kill(os.getpid(), signal.SIGUSR1)
+
+    def _on_summary_created(self, trainer, summary):
+        self.stop_condition_met = self.training_data.add_summary(summary)
 
     def _create_environment(self):
         self.env = UnityEnvironment(file_name=self.env_path, worker_id=self.training_data.uid,
@@ -230,10 +256,10 @@ class TrainerController(object):
             if trainer_parameters_dict[brain_name]['trainer'] == "imitation":
                 self.trainers[brain_name] = BehavioralCloningTrainer(sess, self.env, brain_name,
                                                                      trainer_parameters_dict[brain_name],
-                                                                     self.train_model, self.seed)
+                                                                     self.train_model, self.seed, self.summary_event)
             elif trainer_parameters_dict[brain_name]['trainer'] == "ppo":
                 self.trainers[brain_name] = PPOTrainer(sess, self.env, brain_name, trainer_parameters_dict[brain_name],
-                                                       self.train_model, self.seed)
+                                                       self.train_model, self.seed, self.summary_event)
             else:
                 raise UnityEnvironmentException("The trainer config contains an unknown trainer type for brain {}"
                                                 .format(brain_name))
@@ -326,14 +352,11 @@ class TrainerController(object):
                     # Save Tensorflow model
                     self._save_model(sess, steps=global_step, saver=saver)
                 curr_info = new_info
-                # TODO Trainer should dispatch event when a new summary was created
-                summary = trainer.get_summary
-                if summary:
-                    stop_condition_met = self.training_data.add_summary(summary)
-                    if stop_condition_met:
-                        self.logger.info('Training session #{0} is stopping because {1}'.format(
-                            self.training_data.uid, stop_condition_met))
-                        break
+
+                if self.stop_condition_met:
+                    self.logger.info('Training session #{0} is stopping because {1}'.format(
+                        self.training_data.uid, self.stop_condition_met))
+                    break
                 if interrupted:
                     self.training_data.flag_interrupted()
                     self.logger.info('Training was interrupted. Please wait while the graph is generated.')
