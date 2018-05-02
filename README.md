@@ -12,12 +12,17 @@ Options are identical to running learn.py with the exception of --worker-id whic
 
 Hyperparameters still get loaded from trainer_config.yaml. However, they will be complemented or overridden by the ones defined in your code.
 
+**UPDATE: Batch Processing**
+
+In order to cover use cases like genetic algorithms, it's now possible to run groups of trainers, process intermediate results and launch subsequent groups with refined training data.
+See [/python/unitytrainers/hypertuner.py](https://github.com/mbaske/ml-agents-hyperparams/tree/master/python/unitytrainers/hypertuner.py) for details.
+
 Tested with ml-agents v0.3 on macOS (Python 3.6). Consider this project an experiment, I might not maintain code compatibility with future releases of ml-agents.
 
 ### Example
 This is a simple grid search demo. We use the tennis environment from ml-agents examples. Training data is being created beforehand and then served incrementally to the training sessions.
 
-	def _setup(self):
+	def grid_demo(self):
         stop = [StopCondition('episode_length', '> 40')]
         beta = [1e-4, 1e-3, 1e-2]
         gamma = [0.8, 0.9, 0.995]

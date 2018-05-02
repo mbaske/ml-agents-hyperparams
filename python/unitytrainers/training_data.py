@@ -4,7 +4,7 @@
 # M.Baske, April 2018
 
 
-class TrainingData():
+class TrainingData(object):
     # exit status flags
     DEFAULT = -1
     TRAINING_INTERRUPTED = -2

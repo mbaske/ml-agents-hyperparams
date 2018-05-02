@@ -19,8 +19,11 @@ from unitytrainers.bc.trainer_mod import BehavioralCloningTrainer
 from unityagents import UnityEnvironment, UnityEnvironmentException
 
 
-class SummaryEvent():
-
+class SummaryEvent(object):
+    """
+    SummaryEvent is dispatched at intervals corresponding to the
+    summary_freq parameter in trainer_config.yaml
+    """
     def __init__(self, default_handler):
         self.handlers = [default_handler]
 
