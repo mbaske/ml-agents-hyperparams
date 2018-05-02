@@ -33,7 +33,7 @@ class HyperTuner(object):
         """
         return True
 
-    def start_trainig(self):
+    def start_training(self):
         """
         Must be invoked after data was generated.
         """
@@ -53,7 +53,7 @@ class HyperTuner(object):
         self.logger.info('Creating training data for batch #{0}'.format(self.num_batch))
         self.grid_demo()
         self.logger.info('Starting batch #{0}'.format(self.num_batch))
-        self.start_trainig()
+        self.start_training()
 
     def grid_demo(self):
         """
@@ -69,7 +69,7 @@ class HyperTuner(object):
                 descr = '#{0}_beta_{1}_gamma_{2}'.format(self.num_batch, '%.0E' % Decimal(b), g)
                 self.training_data.append(TrainingData(hyper, descr, stop))
 
-        # self.start_trainig()
+        # self.start_training()
 
     def result_handler(self, training_data):
         """
