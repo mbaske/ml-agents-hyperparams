@@ -26,6 +26,7 @@ class HyperTuner(object):
     def batch_process(self):
         """
         Set True for batch processing.
+        Not to be confused with hyperparameter "batch_size"
 
         @rtype:   bool
         @return:  batch processing enabled
