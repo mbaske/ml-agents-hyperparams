@@ -3,11 +3,6 @@
 # Added to enable automated hyperparameter tuning
 # M.Baske, April 2018
 
-# # Unity ML Agents
-#
-# Modified to enable automated hyperparameter tuning
-# M.Baske, April 2018
-
 import logging
 import signal
 from concurrent import futures

@@ -19,8 +19,8 @@ class HyperTuner(object):
         self.logger = logging.getLogger("hypertuner")
         self.start_event = start_event
         self.training_data = []
-        self.counter = 0
-        self.batch = 0
+        self.num_trainer = 0
+        self.num_batch = 0
 
     @property
     def batch_process(self):
@@ -50,9 +50,9 @@ class HyperTuner(object):
         """
         Demonstrates batch processing. We just run the same grid search 3 times.
         """
-        self.logger.info('Creating training data for batch #{0}'.format(self.batch))
+        self.logger.info('Creating training data for batch #{0}'.format(self.num_batch))
         self.grid_demo()
-        self.logger.info('Starting batch #{0}'.format(self.batch))
+        self.logger.info('Starting batch #{0}'.format(self.num_batch))
         self.start_trainig()
 
     def grid_demo(self):
@@ -66,7 +66,7 @@ class HyperTuner(object):
             for g in gamma:
                 hyper = {'beta': b, 'gamma': g}
                 # descr = '_beta_{0}_gamma_{1}'.format('%.0E' % Decimal(b), g)
-                descr = '#{0}_beta_{1}_gamma_{2}'.format(self.batch, '%.0E' % Decimal(b), g)
+                descr = '#{0}_beta_{1}_gamma_{2}'.format(self.num_batch, '%.0E' % Decimal(b), g)
                 self.training_data.append(TrainingData(hyper, descr, stop))
 
         # self.start_trainig()
@@ -90,11 +90,11 @@ class HyperTuner(object):
         """
         Called by TrainerRunnner after a batch of training sessions has finished.
         """
-        self.logger.info('Batch #{0} completed'.format(self.batch))
+        self.logger.info('Batch #{0} completed'.format(self.num_batch))
 
         # batch demo continued
-        if self.batch < 2:
-            self.batch += 1
+        if self.num_batch < 2:
+            self.num_batch += 1
             self.batch_demo()
         else:
             self.logger.info('All training sessions completed!')
@@ -108,10 +108,10 @@ class HyperTuner(object):
         @rtype:   TrainingData
         @return:  TrainingData
         """
-        if len(self.training_data) is self.counter:
+        if len(self.training_data) is self.num_trainer:
             return None
         else:
-            data = self.training_data[self.counter]
-            data.uid = self.counter
-            self.counter += 1
+            data = self.training_data[self.num_trainer]
+            data.uid = self.num_trainer
+            self.num_trainer += 1
             return data
