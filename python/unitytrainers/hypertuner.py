@@ -9,10 +9,12 @@ from .training_data import TrainingData, StopCondition
 
 
 class HyperTuner(object):
+    """
+    Implements the logic for creating and serving training data.
+    """
+
     def __init__(self, start_event):
         """
-        Implements the logic for creating and serving training data.
-
         @type  start_event: StartEvent
         @param start_event: StartEvent
         """
@@ -39,9 +41,9 @@ class HyperTuner(object):
         """
         self.start_event.dispatch()
 
-    def setup(self):
+    def initialize(self):
         """
-        Called by TrainerRunnner.
+        Called by TrainerRunnner at start up.
         """
         # self.grid_demo()
         self.batch_demo()

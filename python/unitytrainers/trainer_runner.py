@@ -25,7 +25,7 @@ class TrainerRunner(object):
                 self.workers = 1
         self.logger.info('Initializing Process Pool - {0} workers'.format(self.workers))
         self.pool = futures.ProcessPoolExecutor(max_workers=self.workers)
-        self.tuner.setup()
+        self.tuner.initialize()
 
     def _start(self):
         self.out_of_data = False
