@@ -23,6 +23,8 @@ class TrainerRunner(object):
                 self.workers = cpu_count()
             except NotImplementedError:
                 self.workers = 1
+        else:
+            self.workers = workers
         self.logger.info('Initializing Process Pool - {0} workers'.format(self.workers))
         self.pool = futures.ProcessPoolExecutor(max_workers=self.workers)
         self.tuner.initialize()
