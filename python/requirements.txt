@@ -1,0 +1,8 @@
+tensorflow==1.4.0
+Pillow>=4.2.1
+matplotlib
+numpy>=1.11.0
+jupyter
+pytest>=3.2.2
+docopt
+pyyaml
