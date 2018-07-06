@@ -27,7 +27,7 @@ This is a simple grid search demo. We use the tennis environment from ml-agents 
                 
 Start your training sessions and compare their performance in TensorBoard.
 
-	python3 tune.py tennis --run-id=tennis --save-freq=25000 --train
+	python3 tune.py tennis --run-id=tennis --save-freq=25000
 	tensorboard --logdir=summaries
 
 <img src="images/tensorboard.png" align="middle" width="1440"/>

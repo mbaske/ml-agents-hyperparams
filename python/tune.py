@@ -27,10 +27,8 @@ if __name__ == '__main__':
       --save-freq=<n>            Frequency at which to save model [default: 50000].
       --seed=<n>                 Random seed used for training [default: -1].
       --slow                     Whether to run the game at training speed [default: False].
-      --train                    Whether to train model, or only run inference [default: False].
       --workers=<n>              Number of concurrent training sessions [default: 0].
       --docker-target-name=<dt>       Docker Volume to store curriculum, executable and model files [default: Empty].
-      --batch                    Batch process training sessions [default: False].
     '''
     # --worker-id is not supported. Port numbers are assigned internally and correspond to sub-processes.
 
@@ -46,7 +44,7 @@ if __name__ == '__main__':
     run_id = options['--run-id']
     seed = int(options['--seed'])
     load_model = options['--load']
-    train_model = options['--train']
+    train_model = True
     save_freq = int(options['--save-freq'])
     env_path = options['<env>']
     keep_checkpoints = int(options['--keep-checkpoints'])
