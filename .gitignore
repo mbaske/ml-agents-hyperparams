@@ -1,1 +1,19 @@
 *.DS_Store
+__pycache__
+
+# Tensorflow Model Info
+/models
+/summaries
+python/models
+python/summaries
+
+# Builds
+*.apk
+*.unitypackage
+*.app
+*.exe
+*.x86_64
+*.x86
+
+# Generated doc folders
+/docs/html
