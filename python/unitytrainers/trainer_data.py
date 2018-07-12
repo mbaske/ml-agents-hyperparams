@@ -17,7 +17,7 @@ class TrainerData(object):
             self.load(file)
         return self
 
-    def __init__(self, descr=None, hyperparams=None, stop_conditions=None, verbose_result=False):
+    def __init__(self, descr='', hyperparams=None, stop_conditions=None, verbose_result=False):
         """
         Data for running a trainer.
 
@@ -152,13 +152,14 @@ class TrainerData(object):
         self._exit_status = TrainerData.TRAINING_INTERRUPTED
 
     def _convert_stop_conditions(self, instantiate):
-        d = []
-        for sc in self._stop_conditions:
-            if instantiate:
-                d.append(StopCondition(sc['prop'], sc['cond']))
-            else:
-                d.append({'prop': sc.prop, 'cond': sc.cond})
-        self._stop_conditions = d
+        if self.stop_conditions:
+            d = []
+            for sc in self._stop_conditions:
+                if instantiate:
+                    d.append(StopCondition(sc['prop'], sc['cond']))
+                else:
+                    d.append({'prop': sc.prop, 'cond': sc.cond})
+            self._stop_conditions = d
 
     def _print_dict(self, d):
         for k, v in d.items():
@@ -170,10 +171,12 @@ class TrainerData(object):
     def __str__(self):
         s = 'Trainer #{0} (exit {1})'.format(self.num, self.exit_status)
         s += '\n\tHyperparameters:'
-        for key, value in self.hyperparams.items():
-            s += '\n\t{0}: \t{1}'.format(key, value)
-        for sc in self.stop_conditions:
-            s += '\n\tStop if {0}'.format(sc)
+        if self.hyperparams:
+            for key, value in self.hyperparams.items():
+                s += '\n\t{0}: \t{1}'.format(key, value)
+        if self.stop_conditions:
+            for sc in self.stop_conditions:
+                s += '\n\tStop if {0}'.format(sc)
         r = len(self.result)
         if r > 0:
             s += '\n\tResult:'
