@@ -6,7 +6,7 @@
 * Implement your optimization algorithm in [/python/unitytrainers/hypertuner.py](https://github.com/mbaske/ml-agents-hyperparams/blob/master/v0_3/python/unitytrainers/hypertuner.py)
 * Run /python/tune.py
 
-Options are identical to running learn.py with the exception of --worker-id which is not supported. Instead, you might pass --workers=\<n> for setting the number of concurrent training sessions. Each session runs in its own process with the default number of processes matching the amount of CPU cores. 
+Options are identical to running learn.py with the exception of --train and --worker-id which are not supported. Instead, you might pass --workers=\<n> for setting the number of concurrent training sessions. Each session runs in its own process with the default number of processes matching the amount of CPU cores. 
 
 Hyperparameters still get loaded from trainer_config.yaml. However, they will be complemented or overridden by the ones defined in your code.
 
