@@ -201,10 +201,11 @@ class TrainingData(object):
 
     def add_summary(self, summary):
         brain = summary['brain_name']
-        if brain not in self._result:
-            self._result[brain] = []
         if self._verbose:
-            self._result[brain].append(summary)
+            if brain not in self._result:
+                self._result[brain] = [summary]
+            else:
+                self._result[brain].append(summary)
         else:
             self._result[brain] = [summary]
         self._stop_condition_met = self.eval_stop_conditions(summary)
