@@ -430,6 +430,7 @@ class TrainerControllerMod(object):
                     self.logger.info('Learning was interrupted. Please wait '
                                      'while the graph is generated.')
                     self._save_model(sess, steps=global_step, saver=saver)
+                    self.training_data.flag_interrupted()
                 pass
         self.env.close()
         if self.train_model:
