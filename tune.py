@@ -134,8 +134,8 @@ class HyperTuner(object):
 if __name__ == '__main__':
     _USAGE = '''
     Usage:
-      learn (<env>) [options]
-      learn --help
+      tune (<env>) [options]
+      tune --help
 
     Options:
       --curriculum=<directory>      Curriculum json directory for environment [default: None].
