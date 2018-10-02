@@ -89,7 +89,7 @@ class HyperTuner(object):
 
     def run_trainer_batch(self):
         """
-        Must be invoked after trainer data was generated.
+        Must be invoked in order to run trainers, after TrainingData was generated.
         """
         self.wait_for_runner_idle = False
         for i in range(min(self.runner.available_workers, len(self.training_data))):
