@@ -7,7 +7,7 @@ import logging
 import numpy as np
 from docopt import docopt
 
-from trainer_controller_mod import TrainerControllerMod
+from trainer_controller import TrainerController
 from mlagents.trainers.exception import TrainerError
 
 
@@ -40,7 +40,7 @@ def run_training(run_seed, run_options):
         if run_options['--training-data-path'] != 'None' else None)
     
     # Create controller and begin training.
-    tc = TrainerControllerMod(env_path, run_id + sub_id,
+    tc = TrainerController(env_path, run_id + sub_id,
                            save_freq, curriculum_file, fast_simulation,
                            load_model, train_model, worker_id,
                            keep_checkpoints, lesson, run_seed,

@@ -7,7 +7,7 @@
 """Launches trainers for each External Brains in a Unity Environment."""
 
 import sys
-sys.path.append('trainers_mod')
+sys.path.append('training')
 import os
 import logging
 
@@ -20,13 +20,13 @@ from mlagents.envs.environment import UnityEnvironment
 from mlagents.envs.exception import UnityEnvironmentException
 from mlagents.trainers.meta_curriculum import MetaCurriculum
 from mlagents.trainers.exception import MetaCurriculumError
-from trainer_ppo_mod import PPOTrainerMod
-from trainer_bc_mod import BehavioralCloningTrainerMod
+from mlagents.trainers.ppo.trainer import PPOTrainer
+from mlagents.trainers.bc.trainer import BehavioralCloningTrainer
 from training_data import TrainingData
 from training_event import TrainingEvent
 
 
-class TrainerControllerMod(object):
+class TrainerController(object):
     def __init__(self, env_path, run_id, save_freq, curriculum_folder,
                  fast_simulation, load, train, worker_id, keep_checkpoints,
                  lesson, seed, docker_target_name, trainer_config_path,
@@ -130,16 +130,8 @@ class TrainerControllerMod(object):
                                               'curriculum file has the same '
                                               'name as the Brain '
                                               'whose curriculum it defines.')
-
-        # Hypertuner: Handle training data and stats summary.
-        self.stop_condition_met = None
+        # Hypertuner: Load training data from json file.
         self.training_data = TrainingData.from_file(training_data)
-        self.summary_event = TrainingEvent(self._summary_handler)
-        self.summary_event.trainer_num = self.training_data.num
-
-    def _summary_handler(self, summary):
-        self.stop_condition_met = self.stop_condition_met or \
-            self.training_data.add_summary(summary)
 
     def _get_measure_vals(self):
         if self.meta_curriculum:
@@ -243,26 +235,27 @@ class TrainerControllerMod(object):
             if self.training_data.hyperparams:
                 for k, v in self.training_data.hyperparams.items():
                     trainer_parameters[k] = v
+
             trainer_parameters_dict[brain_name] = trainer_parameters.copy()
         for brain_name in self.env.external_brain_names:
             if trainer_parameters_dict[brain_name]['trainer'] == 'imitation':
-                self.trainers[brain_name] = BehavioralCloningTrainerMod(
+                self.trainers[brain_name] = BehavioralCloningTrainer(
                     sess, self.env.brains[brain_name],
                     trainer_parameters_dict[brain_name], self.train_model,
-                    self.seed, self.run_id, self.summary_event)
+                    self.seed, self.run_id)
             elif trainer_parameters_dict[brain_name]['trainer'] == 'ppo':
-                self.trainers[brain_name] = PPOTrainerMod(
+                self.trainers[brain_name] = PPOTrainer(
                     sess, self.env.brains[brain_name],
                     self.meta_curriculum
                         .brains_to_curriculums[brain_name]
                         .min_lesson_length if self.meta_curriculum else 0,
                     trainer_parameters_dict[brain_name],
-                    self.train_model, self.seed, self.run_id, self.summary_event)
+                    self.train_model, self.seed, self.run_id)
             else:
                 raise UnityEnvironmentException('The trainer config contains '
                                                 'an unknown trainer type for '
                                                 'brain {}'
-                                                .format(brain_name))
+                                                .format(brain_name))                
 
     def _load_config(self):
         try:
@@ -341,9 +334,9 @@ class TrainerControllerMod(object):
                     trainer.write_tensorboard_text('Hyperparameters',
                                                    trainer.parameters)
             try:
-                while any([t.get_step <= t.get_max_steps \
-                           for k, t in self.trainers.items()]) \
-                      or not self.train_model:
+                stop_condition_met = None
+                while (not stop_condition_met and any([t.get_step <= t.get_max_steps \
+                      for k, t in self.trainers.items()])) or not self.train_model:
                     if self.meta_curriculum:
                         # Get the sizes of the reward buffers.
                         reward_buff_sizes = {k:len(t.reward_buffer) \
@@ -396,6 +389,8 @@ class TrainerControllerMod(object):
                                 and trainer.get_step <= trainer.get_max_steps:
                             # Perform gradient descent with experience buffer
                             trainer.update_policy()
+                        # Hypertuner: Conditional stop.
+                        stop_condition_met = self.check_stats(trainer, global_step)
                         # Write training statistics to Tensorboard.
                         if self.meta_curriculum is not None:
                             trainer.write_summary(
@@ -405,15 +400,12 @@ class TrainerControllerMod(object):
                                     .lesson_num)
                         else:
                             trainer.write_summary(global_step)
+                        if stop_condition_met:
+                            self.logger.info('Training session #{0} is stopping because {1}' \
+                                .format(self.training_data.num, stop_condition_met))
                         if self.train_model \
                                 and trainer.get_step <= trainer.get_max_steps:
                             trainer.increment_step_and_update_last_reward()
-                    # Hypertuner: Stop training if any of the trainers met
-                    # any of the stop conditions.
-                    if self.stop_condition_met:
-                        self.logger.info('Training session #{0} is stopping because {1}' \
-                            .format(self.training_data.num, self.stop_condition_met))
-                        break
                     global_step += 1
                     if global_step % self.save_freq == 0 and global_step != 0 \
                             and self.train_model:
@@ -426,14 +418,25 @@ class TrainerControllerMod(object):
             except KeyboardInterrupt:
                 print('--------------------------Now saving model--------------'
                       '-----------')
+                self.training_data.flag_interrupted()
                 if self.train_model:
                     self.logger.info('Learning was interrupted. Please wait '
                                      'while the graph is generated.')
                     self._save_model(sess, steps=global_step, saver=saver)
-                    self.training_data.flag_interrupted()
                 pass
         self.env.close()
         if self.train_model:
             self._export_graph()
-        # Hypertuner: Save file.
         self.training_data.save()
+
+    def check_stats(self, trainer, global_step):
+        if global_step != 0 and global_step % trainer.trainer_parameters['summary_freq'] == 0:
+            stats = {}
+            stats['step'] = int(trainer.get_step)
+            stats['brain_name'] = trainer.brain_name
+            for key in trainer.stats:
+                if len(trainer.stats[key]) > 0:
+                    stats[key] = float(np.mean(trainer.stats[key]))
+            return self.training_data.add_stats(stats)
+        else:
+            return None

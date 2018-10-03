@@ -17,7 +17,6 @@ A batch runner for [Unity ML-Agents](https://github.com/Unity-Technologies/ml-ag
 		--save-freq=<n>               Frequency at which to save model [default: 50000].
 		--seed=<n>                    Random seed used for training [default: -1].
 		--slow                        Whether to run the game at training speed [default: False].
-		--train                       Whether to train model, or only run inference [default: False].
 		--docker-target-name=<dt>     Docker volume to store training-specific files [default: None].
 		--no-graphics                 Whether to run the environment in no-graphics mode [default: False].
 		--workers=<n>                 Number of subprocesses / concurrent training sessions [default: 0].

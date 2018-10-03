@@ -127,8 +127,8 @@ class TrainingData(object):
         if self.result:
             for brain, result in self.result.items():
                 s += '\n- ' + brain
-                for summary in result:
-                    for k, v in summary.items():
+                for stats in result:
+                    for k, v in stats.items():
                         s += '\n\t- {0}: \t{1}'.format(k, v)
         else:
             s += ' - N/A'
@@ -199,28 +199,28 @@ class TrainingData(object):
             with open(self._file, 'w') as f:
                 json.dump(self.__dict__, f, indent=4)
 
-    def add_summary(self, summary):
-        brain = summary['brain_name']
+    def add_stats(self, stats):
+        brain = stats['brain_name']
         if self._verbose:
             if brain not in self._result:
-                self._result[brain] = [summary]
+                self._result[brain] = [stats]
             else:
-                self._result[brain].append(summary)
+                self._result[brain].append(stats)
         else:
-            self._result[brain] = [summary]
-        self._stop_condition_met = self.eval_stop_conditions(summary)
+            self._result[brain] = [stats]
+        self._stop_condition_met = self._eval_stop_conditions(stats)
         return self._stop_condition_met
 
-    def eval_stop_conditions(self, summary):
-        if self.stop_conditions:
-            for i, cond in enumerate(self.stop_conditions):
-                if cond.evaluate(summary):
+    def _eval_stop_conditions(self, stats):
+        if self._stop_conditions:
+            for i, cond in enumerate(self._stop_conditions):
+                if cond.evaluate(stats):
                     self._exit_status = i
-                    return summary['brain_name'] + ' ' + str(cond)
+                    return stats['brain_name'] + ' ' + str(cond)
         return None
 
     def _convert_stop_conditions(self, instantiate):
-        if self.stop_conditions:
+        if self._stop_conditions:
             d = []
             for sc in self._stop_conditions:
                 if instantiate:
@@ -247,9 +247,9 @@ class StopCondition():
         self.prop = prop
         self.cond = cond
 
-    def evaluate(self, summary):
-        if self.prop in summary:
-            return eval("summary['" + self.prop + "'] " + self.cond)
+    def evaluate(self, stats):
+        if self.prop in stats:
+            return eval("stats['" + self.prop + "'] " + self.cond)
         return False
 
     def __str__(self):

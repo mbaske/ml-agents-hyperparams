@@ -37,7 +37,7 @@ class Runner(object):
         options['--sub-id'] = training_data.descr
         options['--worker-id'] = training_data.num
         options['--training-data-path'] = training_data.file
-        args = [sys.executable, self.dir + '/learn_mod.py', options['<env>']]
+        args = [sys.executable, self.dir + '/learn.py', options['<env>']]
         del(options['<env>'])
         for k, v in options.items():
             if type(v) is bool:
@@ -45,21 +45,21 @@ class Runner(object):
                     args.append(k)
             else:
                 args.append(k + '=' + str(v))
-        # Launch learn_mod.py instance.
+        # Launch learn.py instance.
         self.procs.append(subprocess.Popen(args))
 
-    def poll(self, trainer_done_event):
+    def poll(self, event):
         q = queue.Queue()
         try:
             t = threading.Thread(target=self._poll, args=[q])
             t.start()
             t.join()
-            # learn_mod.py instance complete.
+            # learn.py instance complete.
             index = q.get()
             args = self.procs[index].args
             del(self.procs[index])
             # Notify HyperTuner.
-            trainer_done_event.dispatch(args)
+            event.dispatch(args)
         except KeyboardInterrupt:
             q.put(True)
             sys.exit(0)

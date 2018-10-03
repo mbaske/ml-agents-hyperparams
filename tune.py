@@ -8,9 +8,9 @@ import logging
 import math
 from docopt import docopt
 from decimal import Decimal
-from trainers_mod.runner import Runner
-from trainers_mod.training_data import TrainingData, StopCondition
-from trainers_mod.training_event import TrainingEvent
+from training.runner import Runner
+from training.training_data import TrainingData, StopCondition
+from training.training_event import TrainingEvent
 
 
 class HyperTuner(object):
@@ -21,10 +21,10 @@ class HyperTuner(object):
 
     def __init__(self, runner):
         self.runner = runner
-        self.trainer_done_event = TrainingEvent(self.trainer_done_handler)
+        self.training_event = TrainingEvent(self.training_complete_handler)
         self.logger = logging.getLogger('mlagents.trainers')
         self.training_data = []
-        self.num_trainer = 0
+        self.num_training = 0
         self.num_batch = 0
 
     def initialize(self):
@@ -51,9 +51,9 @@ class HyperTuner(object):
 
                 self.training_data.append(TrainingData(descr, hyper, stop))
 
-        self.run_trainer_batch()
+        self.run_training_batch()
 
-    def trainer_result_handler(self, training_data):
+    def training_result_handler(self, training_data):
         """
         Called after a training session has finished.
         Other sessions belonging to the same batch are either
@@ -87,32 +87,32 @@ class HyperTuner(object):
             self.logger.info('All training sessions completed.')
             return True
 
-    def run_trainer_batch(self):
+    def run_training_batch(self):
         """
-        Must be invoked in order to run trainers, after TrainingData was generated.
+        Must be invoked in order to run trainings, after TrainingData was generated.
         """
         self.wait_for_runner_idle = False
         for i in range(min(self.runner.available_workers, len(self.training_data))):
-            self.run_next_trainer()
-        self.runner.poll(self.trainer_done_event)
+            self.run_next_training()
+        self.runner.poll(self.training_event)
 
-    def run_next_trainer(self):
-        data = self.training_data[self.num_trainer]
-        data.num = self.num_trainer
-        self.num_trainer += 1
+    def run_next_training(self):
+        data = self.training_data[self.num_training]
+        data.num = self.num_training
+        self.num_training += 1
         self.logger.info(self.format_msg('Starting {}'.format(data)))
         self.runner.run(data)
 
-    def trainer_done_handler(self, args):
+    def training_complete_handler(self, args):
         file = [s for s in args if '--training-data-path' in s][0][21:]
         data = TrainingData.from_file(file)
         self.training_data[data.num] = data
-        self.trainer_result_handler(data)
+        self.training_result_handler(data)
 
-        if len(self.training_data) is self.num_trainer:
+        if len(self.training_data) is self.num_training:
             self.wait_for_runner_idle = True
         else:
-            self.run_next_trainer()
+            self.run_next_training()
 
         if self.runner.is_idle:
             if self.wait_for_runner_idle:
@@ -122,7 +122,7 @@ class HyperTuner(object):
             else:
                 self.logger.warn('No training sessions running.')
         else:
-            self.runner.poll(self.trainer_done_event)
+            self.runner.poll(self.training_event)
 
     def format_msg(self, msg):
          s = '\n----------------------------------------------------------------'
@@ -146,7 +146,6 @@ if __name__ == '__main__':
       --save-freq=<n>               Frequency at which to save model [default: 50000].
       --seed=<n>                    Random seed used for training [default: -1].
       --slow                        Whether to run the game at training speed [default: False].
-      --train                       Whether to train model, or only run inference [default: False].
       --docker-target-name=<dt>     Docker volume to store training-specific files [default: None].
       --no-graphics                 Whether to run the environment in no-graphics mode [default: False].
       --workers=<n>                 Number of subprocesses / concurrent training sessions [default: 0].
