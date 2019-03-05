@@ -2,7 +2,7 @@
 
 ## Hyperparameter Tuning for Unity ML-Agents v0.5
 
-A batch runner for [Unity ML-Agents](https://github.com/Unity-Technologies/ml-agents) trainers. 
+A batch runner for [Unity ML-Agents v0.5](https://github.com/Unity-Technologies/ml-agents/releases/tag/0.5.0a) trainers. 
 
 ### How to use
 * Install the `mlagents` packages.
