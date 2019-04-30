@@ -7,7 +7,7 @@ A batch runner for [Unity ML-Agents v0.5](https://github.com/Unity-Technologies/
 ### How to use
 * Install the `mlagents` packages.
 * Implement your search/optimization algorithm in [tune.py](https://github.com/mbaske/ml-agents-hyperparams/blob/master/tune.py). 
-* Run tune.py \<environment\> instead of mlagents-learn with the following options:
+* Run `tune.py \<environment\>` instead of mlagents-learn with the following options:
 							 
         --curriculum=<directory>      Curriculum json directory for environment [default: None].
 		--keep-checkpoints=<n>        How many model checkpoints to keep [default: 5].
