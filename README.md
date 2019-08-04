@@ -28,7 +28,7 @@ Trainers launch as subprocesses, in editor training is not supported. The defaul
 Tested with ml-agents v0.5 on macOS (Python 3.6).
 
 ### Example
-This is a simple grid search demo using the tennis environment from ml-agents examples. Training data is created beforehand and then served incrementally to the trainers.
+This is a simple grid search demo using the tennis environment from ml-agents examples. Hyperparameters and stop conditions are created beforehand and then served incrementally to the trainers.
 
 	def grid_demo(self):
         stop = [StopCondition('episode_length', '> 40')]
