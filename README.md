@@ -1,53 +1,142 @@
 
 
-## Hyperparameter Tuning for Unity ML-Agents v0.5
+## Automated Hyperparameter Search for Unity ML-Agents
 
-A batch runner for [Unity ML-Agents v0.5](https://github.com/Unity-Technologies/ml-agents/releases/tag/0.5.0a) trainers. 
+This is a batch runner for [Unity ML-Agents](https://github.com/Unity-Technologies/ml-agents/) training processes. It is supposed to automate hyperparameter grid searches.
 
-### How to use
-* Install the `mlagents` packages.
-* Implement your search/optimization algorithm in [tune.py](https://github.com/mbaske/ml-agents-hyperparams/blob/master/tune.py). 
-* Run tune.py \<environment\> instead of mlagents-learn with the following options:
-							 
-        --curriculum=<directory>      Curriculum json directory for environment [default: None].
-		--keep-checkpoints=<n>        How many model checkpoints to keep [default: 5].
-		--lesson=<n>                  Start learning from this lesson [default: 0].
-		--load                        Whether to load the model or randomly initialize [default: False].
-		--run-id=<path>               The directory name for model and summary statistics [default: ppo].
-		--save-freq=<n>               Frequency at which to save model [default: 50000].
-		--seed=<n>                    Random seed used for training [default: -1].
-		--slow                        Whether to run the game at training speed [default: False].
-		--docker-target-name=<dt>     Docker volume to store training-specific files [default: None].
-		--no-graphics                 Whether to run the environment in no-graphics mode [default: False].
-		--workers=<n>                 Number of subprocesses / concurrent training sessions [default: 0].
-		--trainer-config-path=<file>  Location of the trainer config yaml file [default: trainer_config.yaml].
+### Config File
+Modify your trainer config file by adding `opt_values` and `opt_stop` yaml parameters.
 
-                
-Trainers launch as subprocesses, in editor training is not supported. The default number of processes matches the amount of CPU cores if `--workers` wasn't specified. Hyperparameters still get loaded from trainer_config.yaml, but will be complemented or overridden by the ones defined in your code. The batch runner uses json files to exchange data with the trainer instances. These files are stored in a directory called `config` that will be created along with the `models` and `summaries` folders.
+`opt_values` lists **parameter value options**, for example
+<pre>
+behaviors:
+  3DBall:
+    trainer_type: ppo
+    hyperparameters:
+      batch_size: 64
+      buffer_size: 12000
+      learning_rate: 0.0003
+      <b>beta:
+        opt_values: [0.001, 0.002, 0.003]
+      epsilon:
+        opt_values: [0.1, 0.2, 0.3]</b>
+      lambd: 0.99
+      num_epoch: 3
+      learning_rate_schedule: linear
+    network_settings:
+      normalize: true
+      hidden_units: 128
+      num_layers: 2
+      vis_encode_type: simple
+    reward_signals:
+      extrinsic:
+        gamma: 0.99
+        strength: 1.0
+    keep_checkpoints: 5
+    max_steps: 500000
+    time_horizon: 1000
+    summary_freq: 12000
 
-Tested with ml-agents v0.5 on macOS (Python 3.6).
+</pre>
+Here, only numerical values are defined, but `opt_values` work with all value types.
+The script will generate training runs for all possible combinations of the specified values. In this case 3 x 3 = 9 runs.  
 
-### Example
-This is a simple grid search demo using the tennis environment from ml-agents examples. Hyperparameters and stop conditions are created beforehand and then served incrementally to the trainers.
+<img src="images/ball_values.png" align="middle"/>  
 
-	def grid_demo(self):
-        stop = [StopCondition('episode_length', '> 40')]
-        beta = [1e-4, 1e-3, 1e-2]
-        gamma = [0.8, 0.9, 0.995]
-        hidden_units = int(math.pow(2, 6 + self.num_batch))
+The python script saves a `config_info.txt` file, listing individual value combinations associated with run IDs. The run IDs are suffixed with sequential numbers, here's the `config_info.txt` for above example:
+<pre>
+3DBall-Mod-0
+- 3DBall
+  - beta: 0.001
+  - epsilon: 0.1
 
-        for b in beta:
-            for g in gamma:
-                hyper = {'beta': b, 'gamma': g, 'hidden_units': hidden_units}
-                descr = '_units_{0}_beta_{1}_gamma_{2}'.format(hidden_units, '%.0E' % Decimal(b), g)
-                self.trainer_data.append(TrainerData(descr, hyper, stop))
-                
-        self.run_trainer_batch()
-                
-Run trainers and compare their performance in TensorBoard.
+3DBall-Mod-1
+- 3DBall
+  - beta: 0.001
+  - epsilon: 0.2
 
-	python3 tune.py tennis --run-id=tennis
-	tensorboard --logdir=summaries
+3DBall-Mod-2
+- 3DBall
+  - beta: 0.001
+  - epsilon: 0.3
 
-<img src="images/tensorboard.png" align="middle" width="1849"/>
+3DBall-Mod-3
+- 3DBall
+  - beta: 0.002
+  - epsilon: 0.1
 
+3DBall-Mod-4
+- 3DBall
+  - beta: 0.002
+  - epsilon: 0.2
+
+3DBall-Mod-5
+- 3DBall
+  - beta: 0.002
+  - epsilon: 0.3
+
+3DBall-Mod-6
+- 3DBall
+  - beta: 0.003
+  - epsilon: 0.1
+
+3DBall-Mod-7
+- 3DBall
+  - beta: 0.003
+  - epsilon: 0.2
+
+3DBall-Mod-8
+- 3DBall
+  - beta: 0.003
+  - epsilon: 0.3
+</pre>
+
+Note that setting `opt_values` for multiple behaviors will increase the run count exponentially, because every behavior permutation will be combined with every other behavior permutation.
+<pre> 
+default_settings:
+  hyperparameters:
+    <b>beta:
+        opt_values: [0.001, 0.002, 0.003]
+    epsilon:
+        opt_values: [0.1, 0.2, 0.3]</b>
+
+behaviors:
+  Goalie:
+    trainer_type: poca
+    hyperparameters:
+    ...
+  Striker:
+    trainer_type: poca
+    hyperparameters:
+    ...
+</pre>
+In the above example, `opt_values` is set in `default_settings` which means the value permutations will be applied to both behaviors individually. The resulting run count would therefore be (3 x 3) x (3 x 3) = 81.
+
+
+You can define **optional stop conditions** with the `opt_stop` parameter:
+<pre> 
+behaviors:
+  3DBall:
+    trainer_type: ppo
+    hyperparameters:
+      ...
+    <b>opt_stop:
+      tag: Environment/Cumulative Reward
+      step: 100000
+      min: 50</b>
+</pre>
+Stop conditions require TensorBoard to be running at `http://localhost:6006/` The python script queries TensorBoard's HTTP API once a minute and checks if any of the active runs' scalar values satisfy the stop conditions.
+* `tag` TensorBoard tag, for instance `Environment/Cumulative Reward`
+* `step` When to start checking values, defaults to 0
+* `min` The condition will evaluate true if the latest value is below min, defaults to -999999999
+* `max` The condition will evaluate true if the latest value is above max, defaults to +999999999  
+
+<img src="images/ball_stop.png" align="middle"/>  
+
+In the above example, we start checking if cumulative rewards are above 50 after 100k steps. Runs that don't make the cut are being stopped prematurely.
+
+### Start Training
+
+Launch your training runs by calling `python mlagents-learn.py` with all the command line arguments you would normally pass to `mlagents-learn`. Assuming that you train with executable environments, you should specify the `--num-envs` argument for the number of concurrent training runs (defaults to 1). The script will open corresponding python consoles for `mlagents-learn` subprocesses, watch their progress and log start/stop events for the individual runs.
+
+Please note that I could only test this on Windows yet. Stopping a training run prematurely on Unix *should* shut down the subprocess gracefully. However on Windows, processes will be terminated immediately, which means they won't save their latest models. ML-Agents' [trainer_controller](https://github.com/Unity-Technologies/ml-agents/blob/main/ml-agents/mlagents/trainers/trainer_controller.py) stops training in case of a `Ctrl-C` input. But as far as I understand it, sending a `Ctrl-C` to a subprocess is not as straight-forward on Windows. It looks like sending a `CTRL_BREAK_EVENT` signal is the preferred workaround, but that would require `trainer_controller` to handle the signal, which it doesn't. I don't consider this to be such a big issue though, because I'm guessing that stop conditions would typically be used for filtering out badly performing runs.
