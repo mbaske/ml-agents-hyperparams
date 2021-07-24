@@ -45,47 +45,47 @@ The script will generate training runs for all possible combinations of the spec
 
 The python script saves a `config_info.txt` file, listing individual value combinations associated with run IDs. The run IDs are suffixed with sequential numbers, here's the `config_info.txt` for above example:
 <pre>
-3DBall-Mod-0
+3DBall-0
 - 3DBall
   - beta: 0.001
   - epsilon: 0.1
 
-3DBall-Mod-1
+3DBall-1
 - 3DBall
   - beta: 0.001
   - epsilon: 0.2
 
-3DBall-Mod-2
+3DBall-2
 - 3DBall
   - beta: 0.001
   - epsilon: 0.3
 
-3DBall-Mod-3
+3DBall-3
 - 3DBall
   - beta: 0.002
   - epsilon: 0.1
 
-3DBall-Mod-4
+3DBall-4
 - 3DBall
   - beta: 0.002
   - epsilon: 0.2
 
-3DBall-Mod-5
+3DBall-5
 - 3DBall
   - beta: 0.002
   - epsilon: 0.3
 
-3DBall-Mod-6
+3DBall-6
 - 3DBall
   - beta: 0.003
   - epsilon: 0.1
 
-3DBall-Mod-7
+3DBall-7
 - 3DBall
   - beta: 0.003
   - epsilon: 0.2
 
-3DBall-Mod-8
+3DBall-8
 - 3DBall
   - beta: 0.003
   - epsilon: 0.3
