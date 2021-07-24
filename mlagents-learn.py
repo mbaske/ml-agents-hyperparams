@@ -404,7 +404,7 @@ class Config():
                 config = yaml.load(f, Loader=yaml.FullLoader)
             return config
         except FileNotFoundError:
-            log(f'Could not load configuration from {path}.')
+            log(f'Could not load configuration from {config_path}.')
 
     """
     Saves config settings to yaml file.
