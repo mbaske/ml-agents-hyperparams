@@ -7,7 +7,7 @@ This is a batch runner for [Unity ML-Agents](https://github.com/Unity-Technologi
 ### Config File
 Modify your trainer config file by adding `opt_values` and `opt_stop` yaml parameters.
 
-`opt_values` lists **parameter value options**, for example
+`opt_values` list **parameter value options**, for example
 <pre>
 behaviors:
   3DBall:
