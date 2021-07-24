@@ -629,7 +629,7 @@ class Runner():
 
 def log(msg):
     now: datetime = datetime.now()
-    current_time: msg = now.strftime("%H:%M:%S")
+    current_time: str = now.strftime("%H:%M:%S")
     print(f'[{current_time}] {msg}')
 
 def main():
