@@ -39,7 +39,7 @@ behaviors:
 
 </pre>
 Here, only numerical values are defined, but `opt_values` works with all value types.
-`python mlagents-learn.py` will generate training runs for all possible combinations of the specified values. In this case 3 x 3 = 9 runs.  
+`mlagents-learn.py` will generate training runs for all possible combinations of the specified values. In this case 3 x 3 = 9 runs.  
 
 <img src="images/ball_values.png" align="middle"/>  
 
