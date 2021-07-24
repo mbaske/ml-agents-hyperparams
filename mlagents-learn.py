@@ -203,7 +203,7 @@ class Behavior():
                 #   - param1 name: param1 value
                 #   - param2 name: param2 value
                 # ...
-                value_info: List[str] = [f'- {name}\n']
+                value_info: List[str] = [f'\n{run_id}-{str(i)}\n- {name}\n']
                 for j, param_name in enumerate(param_names):
                     value_info.append(f'  - {param_name}: {str(value_combo[j])}\n')
                 self.value_infos.append(value_info)
@@ -342,7 +342,6 @@ class Config():
         for i, run_id_combo in enumerate(self.verbose_run_id_combos):
             config_name: str = name + '-' + str(i)
             config_names.append(config_name)
-            config_info.append(f'\n{config_name}\n')
             # Configs by run id
             configs: List[Dict[str, Any]] = []
             for run_id in run_id_combo:
@@ -394,17 +393,17 @@ class Config():
     """
     Loads config settings from yaml file.
 
-    :param str config_path: path to config yaml file
+    :param str path: path to config yaml file
     :return: config settings
     :rytpe: Dict[str, Any]
     """
-    def load_config(self, config_path: str) -> Dict[str, Any]:
+    def load_config(self, path: str) -> Dict[str, Any]:
         try:
-            with open(config_path) as f:
+            with open(path) as f:
                 config = yaml.load(f, Loader=yaml.FullLoader)
             return config
         except FileNotFoundError:
-            log(f'Could not load configuration from {config_path}.')
+            log(f'Could not load configuration from {path}.')
 
     """
     Saves config settings to yaml file.
