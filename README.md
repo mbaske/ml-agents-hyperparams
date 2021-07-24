@@ -7,7 +7,7 @@ This is a batch runner for [Unity ML-Agents](https://github.com/Unity-Technologi
 ### Config File
 Modify your trainer config file by adding `opt_values` and `opt_stop` yaml parameters.
 
-`opt_values` list **parameter value options**, for example
+`opt_values` lists **parameter value options**, for example
 <pre>
 behaviors:
   3DBall:
@@ -38,8 +38,8 @@ behaviors:
     summary_freq: 12000
 
 </pre>
-Here, only numerical values are defined, but `opt_values` work with all value types.
-The script will generate training runs for all possible combinations of the specified values. In this case 3 x 3 = 9 runs.  
+Here, only numerical values are defined, but `opt_values` works with all value types.
+`python mlagents-learn.py` will generate training runs for all possible combinations of the specified values. In this case 3 x 3 = 9 runs.  
 
 <img src="images/ball_values.png" align="middle"/>  
 
@@ -91,7 +91,7 @@ The python script saves a `config_info.txt` file, listing individual value combi
   - epsilon: 0.3
 </pre>
 
-Note that setting `opt_values` for multiple behaviors will increase the run count exponentially, because every behavior permutation will be combined with every other behavior permutation.
+Note that setting `opt_values` for multiple behaviors will increase the number of runs exponentially, because every behavior permutation will be combined with every other behavior permutation.
 <pre> 
 default_settings:
   hyperparameters:
@@ -125,7 +125,7 @@ behaviors:
       step: 100000
       min: 50</b>
 </pre>
-Stop conditions require TensorBoard to be running at `http://localhost:6006/` The python script queries TensorBoard's HTTP API once a minute and checks if any of the active runs' scalar values satisfy the stop conditions.
+Stop conditions require TensorBoard to be running at `http://localhost:6006/` The python script queries TensorBoard's HTTP API once a minute and checks if the active runs' latest scalar values satisfy the stop conditions.
 * `tag` TensorBoard tag, for instance `Environment/Cumulative Reward`
 * `step` When to start checking values, defaults to 0
 * `min` The condition will evaluate true if the latest value is below min, defaults to -999999999

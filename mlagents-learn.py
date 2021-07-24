@@ -199,6 +199,7 @@ class Behavior():
                 self.mod_configs.append(mod_config)
                 self.verbose_run_ids.append(f'{run_id}-{str(i)}\{name}')
                 # Info for value options:
+                # RunID-#
                 # - Behavior name
                 #   - param1 name: param1 value
                 #   - param2 name: param2 value
