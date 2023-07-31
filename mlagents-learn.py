@@ -3,7 +3,7 @@ import json
 import os
 import platform
 import requests
-from subprocess import Popen, CREATE_NEW_CONSOLE
+import subprocess
 import sys
 import time
 from typing import Any, Dict, List, Union
@@ -562,7 +562,7 @@ class Runner():
         self.config: Config = Config(args)
         # Each slot can store a subprocess
         num_slots: int = args.num_envs
-        self.slots: List[Popen] = [None] * num_slots
+        self.slots: List[subprocess.Popen] = [None] * num_slots
         # Short run IDs don't contain behavior names, these
         # are the IDs passed as arguments to the subprocesses
         self.short_run_ids: List[str] = [None] * num_slots
@@ -642,8 +642,10 @@ class Runner():
         self.run_count += 1
 
         args: List[str] = self.args.get_process_args(n, i, self.config.config_paths[n])
-        # Windows only
-        self.slots[i] = Popen(args, creationflags=CREATE_NEW_CONSOLE)
+        if platform.system() == 'Windows':
+            self.slots[i] = subprocess.Popen(args, creationflags=subprocess.CREATE_NEW_CONSOLE)
+        elif platform.system() == 'Linux':
+            self.slots[i] = subprocess.Popen('gnome-terminal -x ' + ' '.join(args), shell=True)
 
         run_id: str = self.args.get_run_id(n)
         self.short_run_ids[i] = run_id
@@ -722,7 +724,7 @@ def log(msg):
 
 
 def main():
-    assert platform.system() is 'Windows'
+    assert platform.system() == 'Windows' or platform.system() == 'Linux', 'Unsupported platform.'
     runner = Runner(ArgParser())
 
 
